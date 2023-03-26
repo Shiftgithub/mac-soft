@@ -646,11 +646,10 @@ def translator():
 
 
 def chatgpt():
-    openai.api_key = "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"
+    openai.api_key = "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"
 
     start_sequence = "\nAI:"
     restart_sequence = "\nHuman: "
-
     # Define the send message function
 
     def send_message():
@@ -723,6 +722,45 @@ def chatgpt():
     window.mainloop()
 
 
+def bmiCalculator():
+    def calculate_bmi():
+        height = float(height_entry.get())
+        weight = float(weight_entry.get())
+        bmi = weight / (height/100)**2
+        result_label.config(text="Your BMI is: {:.2f}".format(bmi))
+    # create the main window
+    root = tk.Tk()
+    root.title("BMI Calculator")
+
+    # create the input frame
+    input_frame = tk.Frame(root)
+    input_frame.pack(padx=20, pady=10)
+
+    # create the height input
+    height_label = tk.Label(input_frame, text="Height (cm):")
+    height_label.pack(side="left")
+    height_entry = tk.Entry(input_frame)
+    height_entry.pack(side="left", padx=5)
+
+    # create the weight input
+    weight_label = tk.Label(input_frame, text="Weight (kg):")
+    weight_label.pack(side="left")
+    weight_entry = tk.Entry(input_frame)
+    weight_entry.pack(side="left", padx=5)
+
+    # create the calculate button
+    calculate_button = tk.Button(
+        root, text="Calculate BMI", command=calculate_bmi)
+    calculate_button.pack(pady=10)
+
+    # create the result label
+    result_label = tk.Label(root, text="")
+    result_label.pack(pady=10)
+
+    # run the main loop
+    root.mainloop()
+
+
 def close_window():
     root.destroy()
 
@@ -780,13 +818,16 @@ app12_image = PhotoImage(file='Image/translator.png')
 app12 = Button(RHB, image=app12_image, bd=0, command=translator)
 app12.place(x=195, y=120)
 
-app13_image = PhotoImage(file='Image/translator.png')
-app13 = Button(RHB, image=app13_image, bd=0, command=chatgpt)
-app13.place(x=330, y=120)
+app13_image = PhotoImage(file='Image/bmi.png')
+app13 = Button(RHB, image=app13_image, bd=0, command=bmiCalculator)
+app13.place(x=260, y=120)
+
+app14_image = PhotoImage(file='Image/chatbot.png')
+app14 = Button(RHB, image=app14_image, bd=0, command=chatgpt)
+app14.place(x=330, y=120)
 
 app10_image = PhotoImage(file='Image/App10.png')
 app10 = Button(RHB, image=app10_image, bd=0, command=close_window)
 app10.place(x=400, y=120)
-
 
 root.mainloop()
