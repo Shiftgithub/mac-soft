@@ -446,9 +446,6 @@ def file():
     subprocess.Popen(r'explorer /select,"C:\path\of\folder\file"')
 
 
-# def chrome():
-#     wb.register('Chrome', None)
-#     wb.open('https://www.google.com/')
 def browser():
     class MainWindow(QMainWindow):
         def __init__(self):
