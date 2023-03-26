@@ -22,3 +22,12 @@ pip install PyAudio
 pip install pywhatkit
 pip install wikipedia
 pip install pyjokes
+
+pip install gradio
+pip install openai
+
+pip install googletrans==4.0.0-rc1
+pip install thread6
+pip install chatterbot
+
+apikey= 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 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

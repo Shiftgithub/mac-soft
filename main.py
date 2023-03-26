@@ -3,8 +3,11 @@ from tkinter import ttk
 from tkinter import ttk, messagebox
 import tkinter as tk
 from tkinter import filedialog
+from math import sqrt
 import platform
 import psutil
+
+from threading import Thread
 
 # brightness
 import screen_brightness_control as pct
@@ -34,8 +37,15 @@ from PyQt5.QtCore import *
 from PyQt5.QtWidgets import *
 from PyQt5.QtWebEngineWidgets import *
 
+import openai
+import gradio as gr
+
+from googletrans import Translator
+
 # camera
 import cv2
+
+import os
 
 
 import subprocess
@@ -506,8 +516,211 @@ def close_apps():
     wb.open('https://chat.openai.com/chat')
 
 
-def camera():
-    pass
+def calculator():
+    class Calculator:
+        def __init__(self, master):
+            self.master = master
+            master.title("Calculator")
+
+            # create entry field for display
+            self.display = tk.Entry(master, width=25, justify="right")
+            self.display.grid(row=0, column=0, columnspan=4, padx=5, pady=5)
+
+            # create buttons for numbers and operators
+            self.create_button("7", 1, 0)
+            self.create_button("8", 1, 1)
+            self.create_button("9", 1, 2)
+            self.create_button("/", 1, 3)
+            self.create_button("4", 2, 0)
+            self.create_button("5", 2, 1)
+            self.create_button("6", 2, 2)
+            self.create_button("*", 2, 3)
+            self.create_button("1", 3, 0)
+            self.create_button("2", 3, 1)
+            self.create_button("3", 3, 2)
+            self.create_button("-", 3, 3)
+            self.create_button("0", 4, 0)
+            self.create_button(".", 4, 1)
+            self.create_button("C", 4, 2)
+            self.create_button("+", 4, 3)
+            self.create_button("%", 5, 0)
+            self.create_button("sqrt", 5, 1)
+            self.create_button("^", 5, 2)
+            self.create_button("(", 6, 0)
+            self.create_button(")", 6, 1)
+            self.create_button("=", 6, 2, 2)
+
+        def create_button(self, text, row, column, columnspan=1):
+            button = tk.Button(self.master, text=text, padx=10, pady=5,
+                               command=lambda: self.button_click(text))
+            button.grid(row=row, column=column,
+                        columnspan=columnspan, padx=2, pady=2)
+
+        def button_click(self, text):
+            if text == "=":
+                try:
+                    expression = self.display.get()
+                    expression = expression.replace('^', '**')
+                    expression = expression.replace('%', '/100*')
+                    result = eval(expression)
+                    self.display.delete(0, tk.END)
+                    self.display.insert(0, str(result))
+                except:
+                    self.display.delete(0, tk.END)
+                    self.display.insert(0, "Error")
+            elif text == "C":
+                self.display.delete(0, tk.END)
+            elif text == "sqrt":
+                try:
+                    number = float(self.display.get())
+                    result = sqrt(number)
+                    self.display.delete(0, tk.END)
+                    self.display.insert(0, str(result))
+                except:
+                    self.display.delete(0, tk.END)
+                    self.display.insert(0, "Error")
+            else:
+                self.display.insert(tk.END, text)
+
+    root = tk.Tk()
+    app = Calculator(master=root)
+    root.mainloop()
+
+
+def translator():
+    class TranslatorApp:
+        def __init__(self, master):
+            self.master = master
+            master.title("English to Bangla Translator")
+
+            # create input frame with label and entry field
+            input_frame = tk.Frame(master)
+            input_frame.pack(padx=20, pady=20)
+            input_label = tk.Label(
+                input_frame, text="Enter English text:", font=("Arial", 12))
+            input_label.grid(row=0, column=0, padx=10, pady=10, sticky="w")
+            self.input_field = tk.Entry(
+                input_frame, width=50, font=("Arial", 12))
+            self.input_field.grid(row=1, column=0, padx=10, pady=10)
+
+            # create button frame with translate and clear buttons
+            button_frame = tk.Frame(master)
+            button_frame.pack(padx=20, pady=20)
+            translate_button = tk.Button(button_frame, text="Translate", font=(
+                "Arial", 12), padx=10, pady=5, command=self.translate)
+            translate_button.pack(side="left")
+            clear_button = tk.Button(button_frame, text="Clear", font=(
+                "Arial", 12), padx=10, pady=5, command=self.clear_input)
+            clear_button.pack(side="left", padx=10)
+
+            # create output frame with label and result text box
+            output_frame = tk.Frame(master)
+            output_frame.pack(padx=20, pady=20)
+            output_label = tk.Label(
+                output_frame, text="Bangla Translation:", font=("Arial", 12))
+            output_label.grid(row=0, column=0, padx=10, pady=10, sticky="w")
+            self.result_text = tk.Text(
+                output_frame, height=4, width=50, font=("Arial", 12))
+            self.result_text.grid(row=1, column=0, padx=10, pady=10)
+
+        def translate(self):
+            # get input text
+            input_text = self.input_field.get()
+
+            # create translator object and translate input text to Bangla
+            translator = Translator()
+            result = translator.translate(input_text, dest="bn").text
+
+            # display translation result
+            self.result_text.delete("1.0", "end")
+            self.result_text.insert("1.0", result)
+
+        def clear_input(self):
+            # clear input field and result text box
+            self.input_field.delete(0, "end")
+            self.result_text.delete("1.0", "end")
+
+    root = tk.Tk()
+    app = TranslatorApp(master=root)
+    root.mainloop()
+
+
+def chatgpt():
+    openai.api_key = "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"
+
+    start_sequence = "\nAI:"
+    restart_sequence = "\nHuman: "
+
+    # Define the send message function
+
+    def send_message():
+        # Get the user's input
+        message = input_field.get()
+        # Add the user's message to the chat window
+        chat_window.configure(state=tk.NORMAL)
+        chat_window.insert(tk.END, 'You: ' + message + '\n', ('right',))
+        chat_window.configure(state=tk.DISABLED)
+        # Create the prompt for OpenAI
+        prompt = restart_sequence.join(
+            [message] + [x[0] for x in chat_history])
+        # Get the response from OpenAI
+        response = openai_create(prompt)
+        # Add the bot's response to the chat window
+        chat_window.configure(state=tk.NORMAL)
+        chat_window.insert(tk.END, 'Bot: ' + response + '\n', ('left',))
+        chat_window.configure(state=tk.DISABLED)
+        # Clear the input field
+        input_field.delete(0, tk.END)
+        # Add the message and response to the chat history
+        chat_history.append((message, response))
+
+    def openai_create(prompt):
+        response = openai.Completion.create(
+            model="text-davinci-003",
+            prompt=prompt,
+            temperature=0.9,
+            max_tokens=150,
+            top_p=1,
+            frequency_penalty=0,
+            presence_penalty=0.6,
+            stop=[" Human:", " AI:"]
+        )
+        return response.choices[0].text
+
+    # Create the Tkinter window
+    window = tk.Tk()
+    window.title('Chatbot')
+
+    # Create the chat window
+    chat_window = tk.Text(window, height=20, width=50, font=(
+        'Arial', 14), wrap=tk.WORD, state=tk.DISABLED)
+    chat_window.tag_configure('left', justify='left',
+                              spacing3=10, font=('Arial', 14))
+    chat_window.tag_configure('right', justify='right',
+                              spacing3=10, font=('Arial', 14))
+
+    # Create the input field
+    input_field = tk.Entry(window, width=50, font=(
+        'Arial', 14), bd=3, relief=tk.RIDGE)
+
+    # Create the send button
+    send_button = tk.Button(window, text='Send', font=(
+        'Arial', 14), command=send_message)
+
+    # Add the widgets to the window
+    chat_window.grid(row=0, column=0, columnspan=2,
+                     padx=10, pady=10, sticky='ew')
+    input_field.grid(row=1, column=0, padx=10, pady=10, sticky='ew')
+    send_button.grid(row=1, column=1, padx=10, pady=10, sticky='e')
+
+    # Set up the chat history
+    chat_history = []
+
+    # Set focus on input field
+    input_field.focus()
+
+    # Start the main loop
+    window.mainloop()
 
 
 def close_window():
@@ -559,9 +772,17 @@ app9_image = PhotoImage(file='Image/App9.png')
 app9 = Button(RHB, image=app9_image, bd=0, command=close_apps)
 app9.place(x=75, y=120)
 
-app11_image = PhotoImage(file='Image/App6.png')
-app11 = Button(RHB, image=app11_image, bd=0, command=camera)
+app11_image = PhotoImage(file='Image/calculator.png')
+app11 = Button(RHB, image=app11_image, bd=0, command=calculator)
 app11.place(x=135, y=120)
+
+app12_image = PhotoImage(file='Image/translator.png')
+app12 = Button(RHB, image=app12_image, bd=0, command=translator)
+app12.place(x=195, y=120)
+
+app13_image = PhotoImage(file='Image/translator.png')
+app13 = Button(RHB, image=app13_image, bd=0, command=chatgpt)
+app13.place(x=330, y=120)
 
 app10_image = PhotoImage(file='Image/App10.png')
 app10 = Button(RHB, image=app10_image, bd=0, command=close_window)
