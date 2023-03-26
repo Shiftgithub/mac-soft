@@ -34,6 +34,10 @@ from PyQt5.QtCore import *
 from PyQt5.QtWidgets import *
 from PyQt5.QtWebEngineWidgets import *
 
+# camera
+import cv2
+
+
 import subprocess
 import webbrowser as wb
 import random
@@ -134,9 +138,8 @@ lb1_plug.place(x=20, y=100)
 
 lb1_time = Label(RHS, font=("Acumin Variable Concept", 15), bg="#f4f5f5")
 lb1_time.place(x=100, y=100)
-
-
 none()
+
 ########################
 
 # speaker part
@@ -503,6 +506,10 @@ def close_apps():
     wb.open('https://chat.openai.com/chat')
 
 
+def camera():
+    pass
+
+
 def close_window():
     root.destroy()
 
@@ -522,38 +529,43 @@ app1.place(x=15, y=50)
 
 app2_image = PhotoImage(file='Image/App2.png')
 app2 = Button(RHB, image=app2_image, bd=0, command=clock)
-app2.place(x=100, y=50)
+app2.place(x=75, y=50)
 
 app3_image = PhotoImage(file='Image/App3.png')
 app3 = Button(RHB, image=app3_image, bd=0, command=calender)
-app3.place(x=185, y=50)
+app3.place(x=135, y=50)
 
 app4_image = PhotoImage(file='Image/App4.png')
 app4 = Button(RHB, image=app4_image, bd=0, command=mode)
-app4.place(x=270, y=50)
+app4.place(x=195, y=50)
 
 app5_image = PhotoImage(file='Image/App5.png')
 app5 = Button(RHB, image=app5_image, bd=0, command=game)
-app5.place(x=350, y=50)
+app5.place(x=260, y=45)
 
 app6_image = PhotoImage(file='Image/App6.png')
 app6 = Button(RHB, image=app6_image, bd=0, command=screenshot)
-app6.place(x=15, y=120)
+app6.place(x=330, y=50)
 
 app7_image = PhotoImage(file='Image/App7.png')
 app7 = Button(RHB, image=app7_image, bd=0, command=file)
-app7.place(x=100, y=120)
+app7.place(x=400, y=50)
 
 app8_image = PhotoImage(file='Image/App8.png')
 app8 = Button(RHB, image=app8_image, bd=0, command=browser)
-app8.place(x=185, y=120)
+app8.place(x=15, y=120)
 
 app9_image = PhotoImage(file='Image/App9.png')
 app9 = Button(RHB, image=app9_image, bd=0, command=close_apps)
-app9.place(x=270, y=120)
+app9.place(x=75, y=120)
+
+app11_image = PhotoImage(file='Image/App6.png')
+app11 = Button(RHB, image=app11_image, bd=0, command=camera)
+app11.place(x=135, y=120)
 
 app10_image = PhotoImage(file='Image/App10.png')
 app10 = Button(RHB, image=app10_image, bd=0, command=close_window)
-app10.place(x=355, y=120)
+app10.place(x=400, y=120)
+
 
 root.mainloop()
