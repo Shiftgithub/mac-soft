@@ -52,6 +52,12 @@ import subprocess
 import webbrowser as wb
 import random
 
+# for snake game
+
+from turtle import *
+from random import randint
+from freegames import square, vector
+
 root = Tk()
 root.title('Mac-soft Tool')
 root.geometry("850x500+300+170")
@@ -645,119 +651,64 @@ def translator():
     root.mainloop()
 
 
-def chatgpt():
-    openai.api_key = "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"
-
-    start_sequence = "\nAI:"
-    restart_sequence = "\nHuman: "
-    # Define the send message function
-
-    def send_message():
-        # Get the user's input
-        message = input_field.get()
-        # Add the user's message to the chat window
-        chat_window.configure(state=tk.NORMAL)
-        chat_window.insert(tk.END, 'You: ' + message + '\n', ('right',))
-        chat_window.configure(state=tk.DISABLED)
-        # Create the prompt for OpenAI
-        prompt = restart_sequence.join(
-            [message] + [x[0] for x in chat_history])
-        # Get the response from OpenAI
-        response = openai_create(prompt)
-        # Add the bot's response to the chat window
-        chat_window.configure(state=tk.NORMAL)
-        chat_window.insert(tk.END, 'Bot: ' + response + '\n', ('left',))
-        chat_window.configure(state=tk.DISABLED)
-        # Clear the input field
-        input_field.delete(0, tk.END)
-        # Add the message and response to the chat history
-        chat_history.append((message, response))
-
-    def openai_create(prompt):
-        response = openai.Completion.create(
-            model="text-davinci-003",
-            prompt=prompt,
-            temperature=0.9,
-            max_tokens=150,
-            top_p=1,
-            frequency_penalty=0,
-            presence_penalty=0.6,
-            stop=[" Human:", " AI:"]
-        )
-        return response.choices[0].text
-
-    # Create the Tkinter window
-    window = tk.Tk()
-    window.title('Chatbot')
-
-    # Create the chat window
-    chat_window = tk.Text(window, height=20, width=50, font=(
-        'Arial', 14), wrap=tk.WORD, state=tk.DISABLED)
-    chat_window.tag_configure('left', justify='left',
-                              spacing3=10, font=('Arial', 14))
-    chat_window.tag_configure('right', justify='right',
-                              spacing3=10, font=('Arial', 14))
-
-    # Create the input field
-    input_field = tk.Entry(window, width=50, font=(
-        'Arial', 14), bd=3, relief=tk.RIDGE)
-
-    # Create the send button
-    send_button = tk.Button(window, text='Send', font=(
-        'Arial', 14), command=send_message)
-
-    # Add the widgets to the window
-    chat_window.grid(row=0, column=0, columnspan=2,
-                     padx=10, pady=10, sticky='ew')
-    input_field.grid(row=1, column=0, padx=10, pady=10, sticky='ew')
-    send_button.grid(row=1, column=1, padx=10, pady=10, sticky='e')
-
-    # Set up the chat history
-    chat_history = []
-
-    # Set focus on input field
-    input_field.focus()
-
-    # Start the main loop
-    window.mainloop()
-
-
 def bmiCalculator():
-    def calculate_bmi():
-        height = float(height_entry.get())
-        weight = float(weight_entry.get())
-        bmi = weight / (height/100)**2
-        result_label.config(text="Your BMI is: {:.2f}".format(bmi))
-    # create the main window
+
+    # Create the main window
     root = tk.Tk()
     root.title("BMI Calculator")
+    root.geometry("400x300")
 
-    # create the input frame
-    input_frame = tk.Frame(root)
-    input_frame.pack(padx=20, pady=10)
+    # Create the labels and entry fields for height and weight
+    height_frame = ttk.Frame(root)
+    height_frame.pack(pady=10)
 
-    # create the height input
-    height_label = tk.Label(input_frame, text="Height (cm):")
-    height_label.pack(side="left")
-    height_entry = tk.Entry(input_frame)
-    height_entry.pack(side="left", padx=5)
+    feet_label = ttk.Label(height_frame, text="Feet:")
+    feet_label.pack(side=tk.LEFT)
+    feet_entry = ttk.Entry(height_frame, width=5)
+    feet_entry.pack(side=tk.LEFT)
 
-    # create the weight input
-    weight_label = tk.Label(input_frame, text="Weight (kg):")
-    weight_label.pack(side="left")
-    weight_entry = tk.Entry(input_frame)
-    weight_entry.pack(side="left", padx=5)
+    inches_label = ttk.Label(height_frame, text="Inches:")
+    inches_label.pack(side=tk.LEFT)
+    inches_entry = ttk.Entry(height_frame, width=5)
+    inches_entry.pack(side=tk.LEFT)
 
-    # create the calculate button
-    calculate_button = tk.Button(
+    weight_frame = ttk.Frame(root)
+    weight_frame.pack(pady=10)
+
+    weight_label = ttk.Label(weight_frame, text="Weight (kg):")
+    weight_label.pack(side=tk.LEFT)
+    weight_entry = ttk.Entry(weight_frame)
+    weight_entry.pack(side=tk.LEFT)
+
+    # Create the function to calculate BMI
+    def calculate_bmi():
+        feet = float(feet_entry.get()) # 5.0
+        inches = float(inches_entry.get()) # 9.0
+        height = (feet * 12 + inches) * 0.0254  # Convert height to meters
+        weight = float(weight_entry.get())
+        # Calculate BMI using the metric system formula
+        bmi = weight / (height ** 2)
+        result_label.config(text="Your BMI is {:.3f}".format(bmi))
+
+    # Create the button to calculate BMI
+    calculate_button = ttk.Button(
         root, text="Calculate BMI", command=calculate_bmi)
     calculate_button.pack(pady=10)
 
-    # create the result label
-    result_label = tk.Label(root, text="")
-    result_label.pack(pady=10)
+    # Create the label to display the result
+    result_label = ttk.Label(root, text="")
+    result_label.pack()
 
-    # run the main loop
+    # Start the main event loop
+    root.mainloop()
+
+
+def chatgpt():
+    root = Tk()
+    root.title('Mac-soft Tool')
+    root.geometry("850x500+300+170")
+    root.resizable(False, False)
+    root.configure(bg='#292e2e')
     root.mainloop()
 
 
@@ -806,7 +757,7 @@ app8_image = PhotoImage(file='Image/App8.png')
 app8 = Button(RHB, image=app8_image, bd=0, command=browser)
 app8.place(x=15, y=120)
 
-app9_image = PhotoImage(file='Image/App9.png')
+app9_image = PhotoImage(file='Image/chatbot.png')
 app9 = Button(RHB, image=app9_image, bd=0, command=close_apps)
 app9.place(x=75, y=120)
 

@@ -31,5 +31,4 @@ pip install thread6
 pip install chatterbot
 
 pip install pygame
-
-apikey= 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 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
+pip install mysql-connector-python
