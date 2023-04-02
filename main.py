@@ -7,8 +7,6 @@ from math import sqrt
 import platform
 import psutil
 
-from threading import Thread
-
 # brightness
 import screen_brightness_control as pct
 
@@ -37,26 +35,13 @@ from PyQt5.QtCore import *
 from PyQt5.QtWidgets import *
 from PyQt5.QtWebEngineWidgets import *
 
-import openai
-import gradio as gr
-
 from googletrans import Translator
-
-# camera
-import cv2
-
-import os
-
 
 import subprocess
 import webbrowser as wb
 import random
 
-# for snake game
-
-from turtle import *
-from random import randint
-from freegames import square, vector
+import mysql.connector
 
 root = Tk()
 root.title('Mac-soft Tool')
@@ -425,32 +410,69 @@ def mode():
 
 
 def game():
-    app5 = Toplevel()
-    app5.geometry("300x500+670+170")
-    app5.title('Ludo')
-    app5.config(bg="#dee2e5")
-    app5.resizable(False, False)
+    class GuessNumberGame:
+        def __init__(self, master):
+            self.master = master
+            self.master.title("Guess the Number")
+            self.master.geometry("500x300")
 
-    # icon
-    image_icon = PhotoImage(file='Image/App5.png')
-    app5.iconphoto(False, image_icon)
+            self.num_to_guess = random.randint(1, 100)
+            self.num_guesses = 0
 
-    ludo_image = PhotoImage(file='Image/ludo back.png')
-    Label(app5, image=ludo_image).pack()
+            self.guess_label = tk.Label(self.master, text="Guess a number between 1 and 100:")
+            self.guess_label.pack()
 
-    label = Label(app5, text='', font=('times', 150))
+            self.guess_entry = tk.Entry(self.master)
+            self.guess_entry.pack()
 
-    def roll():
-        dice = ['\u2680', '\u2681', '\u2682', '\u2683', '\u2684', '\u2685']
-        label.configure(
-            text=f'{random.choice(dice)}{random.choice(dice)}', fg="#29232e")
-        label.pack()
+            self.guess_button = tk.Button(self.master, text="Guess", command=self.check_guess)
+            self.guess_button.pack()
 
-    btn_image = PhotoImage(file="Image/ludo button.png")
-    btn = Button(app5, image=btn_image, bg="#dee3e5", command=roll)
-    btn.pack(padx=10, pady=10)
+            self.result_label = tk.Label(self.master, text="")
+            self.result_label.pack()
 
-    app5.mainloop()
+        def check_guess(self):
+            guess = int(self.guess_entry.get())
+            self.num_guesses += 1
+
+            if guess < self.num_to_guess:
+                self.result_label.config(text="Too low! Guess again.")
+            elif guess > self.num_to_guess:
+                self.result_label.config(text="Too high! Guess again.")
+            else:
+                self.result_label.config(text=f"Congratulations! You guessed the number in {self.num_guesses} guesses.")
+                self.guess_button.config(state=tk.DISABLED)
+                self.guess_entry.config(state=tk.DISABLED)
+
+    root = tk.Tk()
+    game = GuessNumberGame(root)
+    root.mainloop()
+    # app5 = Toplevel()
+    # app5.geometry("300x500+670+170")
+    # app5.title('Ludo')
+    # app5.config(bg="#dee2e5")
+    # app5.resizable(False, False)
+
+    # # icon
+    # image_icon = PhotoImage(file='Image/App5.png')
+    # app5.iconphoto(False, image_icon)
+
+    # ludo_image = PhotoImage(file='Image/ludo back.png')
+    # Label(app5, image=ludo_image).pack()
+
+    # label = Label(app5, text='', font=('times', 150))
+
+    # def roll():
+    #     dice = ['\u2680', '\u2681', '\u2682', '\u2683', '\u2684', '\u2685']
+    #     label.configure(
+    #         text=f'{random.choice(dice)}{random.choice(dice)}', fg="#29232e")
+    #     label.pack()
+
+    # btn_image = PhotoImage(file="Image/ludo button.png")
+    # btn = Button(app5, image=btn_image, bg="#dee3e5", command=roll)
+    # btn.pack(padx=10, pady=10)
+
+    # app5.mainloop()
 
 
 def screenshot():
@@ -703,12 +725,164 @@ def bmiCalculator():
     root.mainloop()
 
 
-def chatgpt():
+def note():
+    
+    # Create a new window
     root = Tk()
-    root.title('Mac-soft Tool')
-    root.geometry("850x500+300+170")
-    root.resizable(False, False)
-    root.configure(bg='#292e2e')
+    root.title("Task Manager")
+    root.geometry("800x600")
+    root.config(bg="#E5E5E5")
+
+    # Define the task list
+    tasks = []
+    # Create a connection to the MySQL database
+    mydb = mysql.connector.connect(
+        host="localhost",
+        user="root",
+        password="",
+        database="todonote"
+    )
+
+    # Create a cursor to execute SQL queries
+    mycursor = mydb.cursor()
+    # Function to add a new task to the list
+
+
+    def add_task():
+        name = name_entry.get()
+        deadline = deadline_entry.get()
+        status = status_var.get()
+        if name and deadline:
+            task = {"name": name, "deadline": deadline, "status": status}
+            tasks.append(task)
+            sql = "INSERT INTO tasks (name, deadline, status) VALUES (%s, %s, %s)"
+            val = (name, deadline, status)
+            mycursor.execute(sql, val)
+            mydb.commit()
+            update_task_list()
+        else:
+            messagebox.showerror("Error", "Please enter task name and deadline.")
+
+    # Function to edit a task in the list
+
+
+    def edit_task():
+        selected_task = task_list.curselection()
+        if selected_task:
+            task = tasks[selected_task[0]]
+            task["name"] = name_entry.get()
+            task["deadline"] = deadline_entry.get()
+            task["status"] = status_var.get()
+            sql = "UPDATE tasks SET name = %s, deadline = %s, status = %s WHERE id = %s"
+            val = (name_entry.get(), deadline_entry.get(),
+                status_var.get(), task["id"])
+            mycursor.execute(sql, val)
+            mydb.commit()
+            update_task_list()
+
+    # Function to delete a task from the list
+
+
+    def delete_task():
+        selected_task = task_list.curselection()
+        if selected_task:
+            task = tasks[selected_task[0]]
+            sql = "DELETE FROM tasks WHERE id = %s"
+            val = (task["id"],)
+            mycursor.execute(sql, val)
+            mydb.commit()
+            tasks.pop(selected_task[0])
+            update_task_list()
+
+    # Function to update the task list
+
+
+    def update_task_list():
+        task_list.delete(0, END)
+        mycursor.execute("SELECT * FROM tasks")
+        rows = mycursor.fetchall()
+        for row in rows:
+            task = {"id": row[0], "name": row[1],
+                    "deadline": row[2], "status": row[3]}
+            tasks.append(task)
+            task_list.insert(
+                END, f"{task['name']} - {task['deadline']} - {task['status']}")
+
+
+    # Create a label for the task list
+    task_list_label = Label(root, text="Task List",
+                            font=("Arial Bold", 16), bg="#E5E5E5")
+    task_list_label.grid(row=0, column=0, padx=10, pady=10)
+
+    # Create a listbox for the task list
+    task_list = Listbox(root, font=("Arial", 12), width=50)
+    task_list.grid(row=1, column=0, padx=20, pady=(0, 10), columnspan=2)
+
+    # Create a label for the task form
+    task_form_label = Label(root, text="Task Form",
+                            font=("Arial Bold", 16), bg="#E5E5E5")
+    task_form_label.grid(row=0, column=2, padx=10, pady=10)
+
+    # Create a label for the task name
+    name_label = Label(root, text="Task Name", font=("Arial", 12), bg="#E5E5E5")
+    name_label.grid(row=1, column=2, padx=10, pady=10, sticky=W)
+
+    # Create a label for the task name
+    name_label = Label(root, text="Task Name", font=("Arial", 12))
+    name_label.grid(row=2, column=0, padx=10, pady=10, sticky="w")
+
+    # Create an entry for the task name
+    name_entry = Entry(root, font=("Arial", 12))
+    name_entry.grid(row=2, column=1, padx=10, pady=10)
+
+    # Create a label for the deadline
+    deadline_label = Label(root, text="Deadline", font=("Arial", 12))
+    deadline_label.grid(row=3, column=0, padx=10, pady=10, sticky="w")
+
+    # Create an entry for the deadline
+    deadline_entry = Entry(root, font=("Arial", 12))
+    deadline_entry.grid(row=3, column=1, padx=10, pady=10)
+
+    # Create a label for the status
+    status_label = Label(root, text="Status", font=("Arial", 12))
+    status_label.grid(row=4, column=0, padx=10, pady=10, sticky="w")
+
+    # Create a variable for the status
+    status_var = StringVar()
+    status_var.set("Not Started")
+
+    # Create a radio button for the not started status
+    not_started_radio = Radiobutton(
+        root, text="Not Started", variable=status_var, value="Not Started", font=("Arial", 12))
+    not_started_radio.grid(row=5, column=0, padx=10, pady=10, sticky="w")
+
+    # Create a radio button for the in progress status
+    in_progress_radio = Radiobutton(
+        root, text="In Progress", variable=status_var, value="In Progress", font=("Arial", 12))
+    in_progress_radio.grid(row=6, column=0, padx=10, pady=10, sticky="w")
+
+    # Create a radio button for the completed status
+    completed_radio = Radiobutton(
+        root, text="Completed", variable=status_var, value="Completed", font=("Arial", 12))
+    completed_radio.grid(row=7, column=0, padx=10, pady=10, sticky="w")
+
+    # Create a button to add a task
+    add_button = Button(root, text="Add Task", command=add_task, font=(
+        "Arial", 12), bg="green", fg="white", activebackground="darkgreen", activeforeground="white")
+    add_button.grid(row=8, column=0, padx=10, pady=10, sticky="w")
+
+    # Create a button to edit a task
+    edit_button = Button(root, text="Edit Task", command=edit_task, font=(
+        "Arial", 12), bg="orange", fg="white", activebackground="darkorange", activeforeground="white")
+    edit_button.grid(row=8, column=1, padx=10, pady=10, sticky="e")
+
+    # Create a button to delete a task
+    delete_button = Button(root, text="Delete Task", command=delete_task, font=(
+        "Arial", 12), bg="red", fg="white", activebackground="darkred", activeforeground="white")
+    delete_button.grid(row=8, column=2, padx=10, pady=10, sticky="e")
+    # Update the task list
+    update_task_list()
+
     root.mainloop()
 
 
@@ -741,7 +915,7 @@ app4_image = PhotoImage(file='Image/App4.png')
 app4 = Button(RHB, image=app4_image, bd=0, command=mode)
 app4.place(x=195, y=50)
 
-app5_image = PhotoImage(file='Image/App5.png')
+app5_image = PhotoImage(file='Image/icons8-games-folder-48.png')
 app5 = Button(RHB, image=app5_image, bd=0, command=game)
 app5.place(x=260, y=45)
 
@@ -773,8 +947,8 @@ app13_image = PhotoImage(file='Image/bmi.png')
 app13 = Button(RHB, image=app13_image, bd=0, command=bmiCalculator)
 app13.place(x=260, y=120)
 
-app14_image = PhotoImage(file='Image/chatbot.png')
-app14 = Button(RHB, image=app14_image, bd=0, command=chatgpt)
+app14_image = PhotoImage(file='Image/icons8-todo-list.gif')
+app14 = Button(RHB, image=app14_image, bd=0, command=note)
 app14.place(x=330, y=120)
 
 app10_image = PhotoImage(file='Image/App10.png')
