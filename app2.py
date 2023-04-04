@@ -18,10 +18,10 @@ window = tk.Tk()
 window.title("Google Translate")
 
 # Create the widgets
-text_entry = tk.Text(window, height=0, width=50)
+text_entry = tk.Text(window, height=10, width=40)
 destination_lang = tk.StringVar()
 destination_lang.set("en")
-destination_menu = tk.OptionMenu(window, destination_lang, "en", "bn", "fr", "de", "zh-cn")
+destination_menu = tk.OptionMenu(window, destination_lang, "en", "es", "fr", "de", "zh-cn")
 translate_button = tk.Button(window, text="Translate", command=translate)
 output_label = tk.Label(window, text="")
 

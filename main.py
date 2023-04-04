@@ -447,6 +447,7 @@ def game():
     root = tk.Tk()
     game = GuessNumberGame(root)
     root.mainloop()
+    
     # app5 = Toplevel()
     # app5.geometry("300x500+670+170")
     # app5.title('Ludo')
